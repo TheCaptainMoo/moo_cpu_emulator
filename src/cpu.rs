@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use crate::instructions::instructions::{ADD_REG_REG, MOV_REG_LIT};
+use crate::instructions::instructions::{ADD_REG_REG, MOV_LIT_REG, MOV_REG_REG, MOV_MEM_REG, MOV_REG_MEM};
 
 const REGISTERS: [&str; 6] = ["ip", "gra", "grb", "grc", "grd", "rra"];
 
@@ -50,6 +50,24 @@ impl CPU<'_> {
         self.register_memory[*index + 1] = data[1];
     }
 
+    fn write_register_index(&mut self, index: usize, data: u16){
+        let data = split_u16(data);
+    
+        self.register_memory[index*2] = data[0];
+        self.register_memory[index*2 + 1] = data[1];
+    }
+
+    fn write_byte(&mut self, index: usize, data: u8){
+        self.program_memory[index] = data;
+    }
+
+    fn write_dual_bytes(&mut self, index: usize, data: u16){
+        let data = split_u16(data);
+
+        self.program_memory[index] = data[0];
+        self.program_memory[index + 1] = data[1];
+    }
+
     fn read_register(&mut self, register: &str) -> u16 {
         let index = match self.register_map.get(register) {
             Some(index) => index,
@@ -57,6 +75,10 @@ impl CPU<'_> {
         };
 
         bind_u8(self.register_memory[*index], self.register_memory[*index + 1])
+    }
+
+    fn read_register_index(&mut self, index: usize) -> u16 {
+        bind_u8(self.register_memory[index*2], self.register_memory[index*2 + 1])
     }
 
     fn read_byte(&mut self, index: usize) -> u8 {
@@ -81,27 +103,43 @@ impl CPU<'_> {
         self.write_register("ip", instruction_address + 2);
 
         instruction
-    }
-
-    fn read_register_index(&mut self, index: usize) -> u16 {
-        bind_u8(self.register_memory[index*2], self.register_memory[index*2 + 1])
-    }
-
-    fn write_register_index(&mut self, index: usize, data: u16){
-        let data = split_u16(data);
-    
-        self.register_memory[index*2] = data[0];
-        self.register_memory[index*2 + 1] = data[1];
-    }
+    } 
 
     fn execute(&mut self, instruction: u8) {
         match instruction {
-            // Move Literal into Any Register
-            MOV_REG_LIT => {
+            // Move Literal into Register
+            MOV_LIT_REG => {
                 let r1 = self.fetch();
                 let literal = self.fetch_16();
 
                 self.write_register_index(r1 as usize, literal);
+            }
+
+            // Move Register (r2) into Register (r1)
+            MOV_REG_REG => {
+                let r1 = self.fetch();
+                let r2 = self.fetch();
+
+                let r2_value = self.read_register_index(r2 as usize);
+                self.write_register_index(r1 as usize, r2_value);
+            }
+
+            // Move Register into Memory 
+            MOV_REG_MEM => {
+                let r1 = self.fetch();
+                let address = self.fetch_16();
+
+                let r1_value = self.read_register_index(r1 as usize);
+                self.write_dual_bytes(address as usize, r1_value);
+            }
+
+            // Move Memory into Register
+            MOV_MEM_REG => {
+                let address = self.fetch_16();
+                let r1 = self.fetch();
+
+                let address_value = self.read_dual_bytes(address as usize);
+                self.write_register_index(r1 as usize, address_value);
             }
 
             // Add Registers Together
@@ -126,6 +164,16 @@ impl CPU<'_> {
     pub fn debug(&mut self) {
         for (index, byte) in self.register_memory.iter().enumerate() {
             println!("Memory[{}]: {:#04X}", index, byte);
+        }
+
+        print!("\n");
+    }
+
+    pub fn view_memory(&mut self, address: u16){
+        print!("{:#04X}: ", address);
+
+        for i in 0..7 {
+            print!("{:#04X} ", self.program_memory[address as usize + i]);
         }
 
         print!("\n");
