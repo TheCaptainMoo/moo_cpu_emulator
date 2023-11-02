@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use crate::instructions::instructions::{ADD_REG_REG, MOV_LIT_REG, MOV_REG_REG, MOV_MEM_REG, MOV_REG_MEM};
+use crate::instructions::instructions::{ADD_REG_REG, MOV_LIT_REG, MOV_REG_REG, MOV_MEM_REG, MOV_REG_MEM, JMP_NOT_EQ};
 
 const REGISTERS: [&str; 6] = ["ip", "gra", "grb", "grc", "grd", "rra"];
 
@@ -109,8 +109,8 @@ impl CPU<'_> {
         match instruction {
             // Move Literal into Register
             MOV_LIT_REG => {
-                let r1 = self.fetch();
                 let literal = self.fetch_16();
+                let r1 = self.fetch();
 
                 self.write_register_index(r1 as usize, literal);
             }
@@ -142,6 +142,16 @@ impl CPU<'_> {
                 self.write_register_index(r1 as usize, address_value);
             }
 
+            // Jump If NOT Equal
+            JMP_NOT_EQ => {
+                let value = self.fetch_16();
+                let address = self.fetch_16();
+
+                if value != self.read_register("rra"){
+                    self.write_register("ip", address);
+                }
+            }
+
             // Add Registers Together
             ADD_REG_REG => {
                 let gr1 = self.fetch();
@@ -162,8 +172,12 @@ impl CPU<'_> {
     }
 
     pub fn debug(&mut self) {
-        for (index, byte) in self.register_memory.iter().enumerate() {
+        /*for (index, byte) in self.register_memory.iter().enumerate() {
             println!("Memory[{}]: {:#04X}", index, byte);
+        }*/
+
+        for i in 0..self.register_map.len(){
+            println!("{} : {:#04X}", REGISTERS[i], bind_u8(self.register_memory[i*2], self.register_memory[i*2+1]));
         }
 
         print!("\n");

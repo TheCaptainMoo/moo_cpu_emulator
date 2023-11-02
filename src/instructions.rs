@@ -8,5 +8,7 @@ pub mod instructions {
     pub const MOV_REG_REG: u8 = 0x01; // Move Register Into Register
     pub const MOV_MEM_REG: u8 = 0x02; // Move Memory Into Register
     pub const MOV_REG_MEM: u8 = 0x03; // Move Register Into Memory
+
+    pub const JMP_NOT_EQ: u8 = 0x09;
     pub const ADD_REG_REG: u8 = 0x10; 
 }

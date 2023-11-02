@@ -1,5 +1,5 @@
 mod instructions;
-use instructions::instructions::{MOV_LIT_REG, ADD_REG_REG, MOV_REG_MEM};
+use instructions::instructions::{MOV_LIT_REG, ADD_REG_REG, MOV_REG_MEM, MOV_MEM_REG, JMP_NOT_EQ};
 
 mod cpu;
 use cpu::CPU;
@@ -12,7 +12,22 @@ const GRD: u8 = 4;
 const RRA: u8 = 5;
 
 fn main() {
-    let program_memory: Vec<u8> = vec![MOV_LIT_REG, GRA, 0x12, 0x34, MOV_LIT_REG, GRB, 0xAB, 0xCD, ADD_REG_REG, GRA, GRB, MOV_REG_MEM, RRA, 0x01, 0x00]; //vec![MOV_GRA_LIT, 0x12, 0x34, MOV_GRB_LIT, 0xAB, 0xCD, ADD_REG_REG, 1, 2];
+    // Counter from 0 to 3 example 
+    let program_memory: Vec<u8> = vec![
+        MOV_MEM_REG, 0x01, 0x00, GRA, 
+        MOV_LIT_REG, 0x00, 0x01, GRB, 
+        ADD_REG_REG, GRA, GRB,
+        MOV_REG_MEM, RRA, 0x01, 0x00,
+        JMP_NOT_EQ, 0x00, 0x03, 0x00, 0x00
+    ];
+    
+    // Writing Register To Memory Example
+    /*vec![
+        MOV_LIT_REG, 0x12, 0x34, GRA, 
+        MOV_LIT_REG, 0xAB, 0xCD, GRB,
+        ADD_REG_REG, GRA, GRB, 
+        MOV_REG_MEM, RRA, 0x01, 0x00
+    ];*/
 
     let memory: Vec<u8> = program_memory.iter()
         .cloned()
@@ -24,7 +39,13 @@ fn main() {
     cpu.debug();
     cpu.view_memory(0x0100);
 
-    cpu.step();
+    for _ in 0..20 {
+        cpu.step();
+        cpu.debug();
+        cpu.view_memory(0x0100);
+    }
+
+    /*cpu.step();
     cpu.debug();
     cpu.view_memory(0x0100);
 
@@ -38,5 +59,5 @@ fn main() {
 
     cpu.step();
     cpu.debug();
-    cpu.view_memory(0x0100);
+    cpu.view_memory(0x0100);*/
 }
