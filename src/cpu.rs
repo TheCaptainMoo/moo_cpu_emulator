@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use crate::instructions::instructions::{MOV_GRA_LIT, MOV_GRB_LIT, ADD_REG_REG};
+use crate::instructions::instructions::{ADD_REG_REG, MOV_REG_LIT};
 
 const REGISTERS: [&str; 6] = ["ip", "gra", "grb", "grc", "grd", "rra"];
 
@@ -84,21 +84,24 @@ impl CPU<'_> {
     }
 
     fn read_register_index(&mut self, index: usize) -> u16 {
-        bind_u8(self.register_memory[index], self.register_memory[index+ 1])
+        bind_u8(self.register_memory[index*2], self.register_memory[index*2 + 1])
+    }
+
+    fn write_register_index(&mut self, index: usize, data: u16){
+        let data = split_u16(data);
+    
+        self.register_memory[index*2] = data[0];
+        self.register_memory[index*2 + 1] = data[1];
     }
 
     fn execute(&mut self, instruction: u8) {
         match instruction {
-            // Load Literal into General Register A
-            MOV_GRA_LIT => {
+            // Move Literal into Any Register
+            MOV_REG_LIT => {
+                let r1 = self.fetch();
                 let literal = self.fetch_16();
-                self.write_register("gra", literal);
-            }
 
-            // Load Literal into General Register B
-            MOV_GRB_LIT => {
-                let literal = self.fetch_16();
-                self.write_register("grb", literal);
+                self.write_register_index(r1 as usize, literal);
             }
 
             // Add Registers Together
@@ -111,7 +114,6 @@ impl CPU<'_> {
 
                 self.write_register("rra", gr1_value + gr2_value);
             }
-
             _ => {}
         }
     }
