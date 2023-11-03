@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use crate::instructions::instructions::{ADD_REG_REG, MOV_LIT_REG, MOV_REG_REG, MOV_MEM_REG, MOV_REG_MEM, JMP_NOT_EQ};
+use crate::instructions::instructions::{ADD_REG_REG, MOV_LIT_REG, MOV_REG_REG, MOV_MEM_REG, MOV_REG_MEM, JMP_NOT_EQ, HLT, MOV_LIT_MEM, ADD_LIT_REG, SUB_REG_REG, SUB_LIT_REG, SUB_REG_LIT, MUL_REG_REG, MUL_LIT_REG, INC_REG, DEC_REG};
 
 const REGISTERS: [&str; 6] = ["ip", "gra", "grb", "grc", "grd", "rra"];
 
@@ -142,6 +142,14 @@ impl CPU<'_> {
                 self.write_register_index(r1 as usize, address_value);
             }
 
+            // Move Literal into Memory
+            MOV_LIT_MEM => {
+                let literal = self.fetch_16();
+                let address = self.fetch_16();
+
+                self.write_dual_bytes(address as usize, literal);
+            }
+
             // Jump If NOT Equal
             JMP_NOT_EQ => {
                 let value = self.fetch_16();
@@ -152,24 +160,102 @@ impl CPU<'_> {
                 }
             }
 
-            // Add Registers Together
+            // Add Register to Register
             ADD_REG_REG => {
-                let gr1 = self.fetch();
-                let gr2 = self.fetch();
+                let r1 = self.fetch();
+                let r2 = self.fetch();
 
-                let gr1_value = self.read_register_index(gr1 as usize);
-                let gr2_value = self.read_register_index(gr2 as usize);
+                let r1_value = self.read_register_index(r1 as usize);
+                let r2_value = self.read_register_index(r2 as usize);
 
-                self.write_register("rra", gr1_value + gr2_value);
+                self.write_register("rra", r1_value + r2_value);
+            }
+
+            // Add Literal to Register
+            ADD_LIT_REG => {
+                let literal = self.fetch_16();
+                let r1 = self.fetch();
+
+                let r1_value = self.read_register_index(r1 as usize);
+
+                self.write_register("rra", literal + r1_value);
+            }
+
+            // Sub Register from Register
+            SUB_REG_REG => {
+                let r1 = self.fetch();
+                let r2 = self.fetch();
+
+                let r1_value = self.read_register_index(r1 as usize);
+                let r2_value = self.read_register_index(r2 as usize);
+
+                self.write_register("rra", r2_value - r1_value);
+            }
+
+            // Sub Literal from Register
+            SUB_LIT_REG => {
+                let literal = self.fetch_16();
+                let r1 = self.fetch();
+
+                let r1_value = self.read_register_index(r1 as usize);
+
+                self.write_register("rra", r1_value - literal);
+            }
+
+            // Sub Register from Literal
+            SUB_REG_LIT => {
+                let r1 = self.fetch();
+                let literal = self.fetch_16();
+
+                let r1_value = self.read_register_index(r1 as usize);
+
+                self.write_register("rra", literal - r1_value);
+            }
+
+            // Increment Register
+            INC_REG => {
+                let r1 = self.fetch();
+                let r1_value = self.read_register_index(r1 as usize);
+
+                self.write_register_index(r1 as usize, r1_value + 1);
+            }
+
+            // Decrement Register
+            DEC_REG => {
+                let r1 = self.fetch();
+                let r1_value = self.read_register_index(r1 as usize);
+
+                self.write_register_index(r1 as usize, r1_value - 1);
+            }
+
+            // Mul Register and Register
+            MUL_REG_REG => {
+                let r1 = self.fetch();
+                let r2 = self.fetch();
+
+                let r1_value = self.read_register_index(r1 as usize);
+                let r2_value = self.read_register_index(r2 as usize);
+
+                self.write_register("rra", r1_value * r2_value);
+            }
+
+            // Mul Literal and Register
+            MUL_LIT_REG => {
+                let literal = self.fetch_16();
+                let r1 = self.fetch();
+
+                let r1_value = self.read_register_index(r1 as usize);
+
+                self.write_register("rra", literal * r1_value);
             }
             _ => {}
         }
     }
 
-    pub fn step(&mut self) {
+    /*pub fn step(&mut self) {
         let instruction = self.fetch();
         self.execute(instruction);
-    }
+    }*/
 
     pub fn debug(&mut self) {
         /*for (index, byte) in self.register_memory.iter().enumerate() {
@@ -181,6 +267,19 @@ impl CPU<'_> {
         }
 
         print!("\n");
+    }
+
+    pub fn run(&mut self) {
+        let instruction: u8 = self.fetch();
+
+        if instruction != HLT {
+            self.execute(instruction);
+
+            //self.debug();
+            //self.view_memory(0x100);
+
+            self.run();
+        }
     }
 
     pub fn view_memory(&mut self, address: u16){

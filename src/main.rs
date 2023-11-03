@@ -1,5 +1,5 @@
 mod instructions;
-use instructions::instructions::{MOV_LIT_REG, ADD_REG_REG, MOV_REG_MEM, MOV_MEM_REG, JMP_NOT_EQ};
+use instructions::instructions::{MOV_LIT_REG, ADD_REG_REG, MOV_REG_MEM, MOV_MEM_REG, JMP_NOT_EQ, HLT};
 
 mod cpu;
 use cpu::CPU;
@@ -18,7 +18,8 @@ fn main() {
         MOV_LIT_REG, 0x00, 0x01, GRB, 
         ADD_REG_REG, GRA, GRB,
         MOV_REG_MEM, RRA, 0x01, 0x00,
-        JMP_NOT_EQ, 0x00, 0x03, 0x00, 0x00
+        JMP_NOT_EQ, 0x00, 0x03, 0x00, 0x00,
+        HLT
     ];
     
     // Writing Register To Memory Example
@@ -26,7 +27,8 @@ fn main() {
         MOV_LIT_REG, 0x12, 0x34, GRA, 
         MOV_LIT_REG, 0xAB, 0xCD, GRB,
         ADD_REG_REG, GRA, GRB, 
-        MOV_REG_MEM, RRA, 0x01, 0x00
+        MOV_REG_MEM, RRA, 0x01, 0x00,
+        HLT
     ];*/
 
     let memory: Vec<u8> = program_memory.iter()
@@ -36,14 +38,16 @@ fn main() {
 
     let mut cpu = CPU::new(memory);
 
-    cpu.debug();
+    cpu.run();
+
+    /*cpu.debug();
     cpu.view_memory(0x0100);
 
     for _ in 0..20 {
         cpu.step();
         cpu.debug();
         cpu.view_memory(0x0100);
-    }
+    }*/
 
     /*cpu.step();
     cpu.debug();
