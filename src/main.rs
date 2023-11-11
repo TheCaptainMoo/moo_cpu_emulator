@@ -1,5 +1,5 @@
 mod instructions;
-use instructions::instructions::{MOV_LIT_REG, ADD_REG_REG, MOV_REG_MEM, MOV_MEM_REG, JMP_NOT_EQ, HLT};
+use instructions::instructions::{MOV_LIT_REG, ADD_REG_REG, MOV_REG_MEM, MOV_MEM_REG, JNE_LIT, HLT};
 
 mod cpu;
 use cpu::CPU;
@@ -18,7 +18,7 @@ fn main() {
         MOV_LIT_REG, 0x00, 0x01, GRB, 
         ADD_REG_REG, GRA, GRB,
         MOV_REG_MEM, RRA, 0x01, 0x00,
-        JMP_NOT_EQ, 0x00, 0x03, 0x00, 0x00,
+        JNE_LIT, 0x00, 0x03, 0x00, 0x00,
         HLT
     ];
     

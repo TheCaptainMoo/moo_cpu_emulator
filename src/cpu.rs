@@ -1,5 +1,13 @@
 use std::collections::HashMap;
-use crate::instructions::instructions::{ADD_REG_REG, MOV_LIT_REG, MOV_REG_REG, MOV_MEM_REG, MOV_REG_MEM, JMP_NOT_EQ, HLT, MOV_LIT_MEM, ADD_LIT_REG, SUB_REG_REG, SUB_LIT_REG, SUB_REG_LIT, MUL_REG_REG, MUL_LIT_REG, INC_REG, DEC_REG};
+use crate::instructions::instructions::{
+    ADD_REG_REG, MOV_LIT_REG, MOV_REG_REG, MOV_MEM_REG, 
+    MOV_REG_MEM, JNE_LIT, HLT, MOV_LIT_MEM, 
+    ADD_LIT_REG, SUB_REG_REG, SUB_LIT_REG, SUB_REG_LIT, 
+    MUL_REG_REG, MUL_LIT_REG, INC_REG, DEC_REG, LSF_REG_LIT,
+    LSF_REG_REG, RSF_REG_LIT, RSF_REG_REG, AND_REG_LIT, AND_REG_REG, 
+    OR_REG_LIT, OR_REG_REG, XOR_REG_LIT, XOR_REG_REG, 
+    NOT, JNE_REG, JEQ_LIT, JEQ_REG, JLT_LIT, JLT_REG, JGT_LIT, JGT_REG,
+};
 
 const REGISTERS: [&str; 6] = ["ip", "gra", "grb", "grc", "grd", "rra"];
 
@@ -150,16 +158,6 @@ impl CPU<'_> {
                 self.write_dual_bytes(address as usize, literal);
             }
 
-            // Jump If NOT Equal
-            JMP_NOT_EQ => {
-                let value = self.fetch_16();
-                let address = self.fetch_16();
-
-                if value != self.read_register("rra"){
-                    self.write_register("ip", address);
-                }
-            }
-
             // Add Register to Register
             ADD_REG_REG => {
                 let r1 = self.fetch();
@@ -248,6 +246,205 @@ impl CPU<'_> {
 
                 self.write_register("rra", literal * r1_value);
             }
+
+            // Left Shift Register by Literal
+            LSF_REG_LIT => {
+                let r1 = self.fetch();
+                let r1_value = self.read_register_index(r1 as usize);
+
+                let literal = self.fetch();
+                self.write_register_index(r1 as usize, r1_value << literal);
+            }
+
+            // Left Shift Register by Register
+            LSF_REG_REG => {
+                let r1 = self.fetch();
+                let r2 = self.fetch();
+
+                let r1_value = self.read_register_index(r1 as usize);
+                let r2_value = self.read_register_index(r2 as usize);
+
+                self.write_register_index(r1 as usize, r1_value << r2_value);
+            }
+
+            // Right Shift Register by Literal
+            RSF_REG_LIT => {
+                let r1 = self.fetch();
+                let r1_value = self.read_register_index(r1 as usize);
+
+                let literal = self.fetch();
+                self.write_register_index(r1 as usize, r1_value >> literal);
+            }
+
+            // Right Shift Register by Register
+            RSF_REG_REG => {
+                let r1 = self.fetch();
+                let r2 = self.fetch();
+
+                let r1_value = self.read_register_index(r1 as usize);
+                let r2_value = self.read_register_index(r2 as usize);
+
+                self.write_register_index(r1 as usize, r1_value >> r2_value);
+            }
+
+            // AND Register with Literal
+            AND_REG_LIT => {
+                let r1 = self.fetch();
+                let r1_value = self.read_register_index(r1 as usize);
+
+                let literal = self.fetch_16();
+
+                self.write_register("rra", r1_value & literal);
+            }
+
+            // AND Register with Register
+            AND_REG_REG => {
+                let r1 = self.fetch();
+                let r2 = self.fetch();
+
+                let r1_value = self.read_register_index(r1 as usize);
+                let r2_value = self.read_register_index(r2 as usize);
+
+                self.write_register("rra", r1_value & r2_value);
+            }
+
+            // OR Register with Literal
+            OR_REG_LIT => {
+                let r1 = self.fetch();
+                let r1_value = self.read_register_index(r1 as usize);
+
+                let literal = self.fetch_16();
+
+                self.write_register("rra", r1_value | literal);
+            }
+
+            // OR Register with Register
+            OR_REG_REG => {
+                let r1 = self.fetch();
+                let r2 = self.fetch();
+
+                let r1_value = self.read_register_index(r1 as usize);
+                let r2_value = self.read_register_index(r2 as usize);
+
+                self.write_register("rra", r1_value | r2_value);
+            }
+
+            // XOR Register with Literal
+            XOR_REG_LIT => {
+                let r1 = self.fetch();
+                let r1_value = self.read_register_index(r1 as usize);
+
+                let literal = self.fetch_16();
+
+                self.write_register("rra", r1_value ^ literal);
+            }
+
+            // XOR Register with Register
+            XOR_REG_REG => {
+                let r1 = self.fetch();
+                let r2 = self.fetch();
+
+                let r1_value = self.read_register_index(r1 as usize);
+                let r2_value = self.read_register_index(r2 as usize);
+
+                self.write_register("rra", r1_value ^ r2_value);
+            }
+
+            NOT => {
+                let r1 = self.fetch();
+                let r1_value = self.read_register_index(r1 as usize);
+
+                self.write_register_index(r1 as usize, !r1_value);
+            }
+
+            // Jump IF Literal NOT Equal
+            JNE_LIT => {
+                let literal = self.fetch_16();
+                let address = self.fetch_16();
+
+                if literal != self.read_register("rra"){
+                    self.write_register("ip", address);
+                }
+            }
+
+            // Jump IF Register NOT Equal
+            JNE_REG => {
+                let r1 = self.fetch();
+                let r1_value = self.read_register_index(r1 as usize);
+
+                let address = self.fetch_16();
+
+                if r1_value != self.read_register("rra"){
+                    self.write_register("ip", address);
+                }
+            }
+
+            // Jump IF Literal Equal
+            JEQ_LIT => {
+                let literal = self.fetch_16();
+                let address = self.fetch_16();
+
+                if literal == self.read_register("rra"){
+                    self.write_register("ip", address);
+                }
+            }
+
+            // Jump IF Register Equal
+            JEQ_REG => {
+                let r1 = self.fetch();
+                let r1_value = self.read_register_index(r1 as usize);
+
+                let address = self.fetch_16();
+
+                if r1_value == self.read_register("rra"){
+                    self.write_register("ip", address);
+                }
+            }
+
+            // Jump IF Literal Less Than
+            JLT_LIT => {
+                let literal = self.fetch_16();
+                let address = self.fetch_16();
+
+                if literal < self.read_register("rra"){
+                    self.write_register("ip", address);
+                }
+            }
+
+            // Jump IF Register Less Than
+            JLT_REG => {
+                let r1 = self.fetch();
+                let r1_value = self.read_register_index(r1 as usize);
+
+                let address = self.fetch_16();
+
+                if r1_value < self.read_register("rra"){
+                    self.write_register("ip", address);
+                }
+            }
+
+            // Jump IF Literal Greater Than
+            JGT_LIT => {
+                let literal = self.fetch_16();
+                let address = self.fetch_16();
+
+                if literal > self.read_register("rra"){
+                    self.write_register("ip", address);
+                }
+            }
+
+            // Jump IF Register Greater Than
+            JGT_REG => {
+                let r1 = self.fetch();
+                let r1_value = self.read_register_index(r1 as usize);
+
+                let address = self.fetch_16();
+
+                if r1_value > self.read_register("rra"){
+                    self.write_register("ip", address);
+                }
+            }
+
             _ => {}
         }
     }
@@ -275,8 +472,8 @@ impl CPU<'_> {
         if instruction != HLT {
             self.execute(instruction);
 
-            //self.debug();
-            //self.view_memory(0x100);
+            self.debug();
+            self.view_memory(0x100);
 
             self.run();
         }

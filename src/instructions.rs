@@ -7,9 +7,6 @@ pub mod instructions {
     pub const MOV_LIT_MEM: u8 = 0x04; // Move Literal Into Memory
     // pub const MOV_REG_PTR_REG: u8 = 0x05; // Move Register Pointer into Register
     // pub const MOV_LIT_OFF_REG: u8 = 0x06; // Move Literal + Register (Offset) into Register
-
-    // Conditional / Branching
-    pub const JMP_NOT_EQ:  u8 = 0x09; // Jump when not equal to
     
     // Arithmetic 
     pub const ADD_REG_REG: u8 = 0x10; // Add Register to Register
@@ -25,5 +22,32 @@ pub mod instructions {
     pub const MUL_LIT_REG: u8 = 0x17; // Mul (unsigned) Literal and Register
     pub const MUL_REG_REG: u8 = 0x18; // Mul (unsigned) Register and Register
 
-    pub const HLT: u8 = 0x20; // Halt Program
+    // Logical
+    pub const LSF_REG_LIT: u8 = 0x19; // Left Shift Register by Literal
+    pub const LSF_REG_REG: u8 = 0x1A; // Left Shift Register by Register
+    pub const RSF_REG_LIT: u8 = 0x1B; // Right Shift Register by Literal
+    pub const RSF_REG_REG: u8 = 0x1C; // Left Shift Register by Register
+
+    pub const AND_REG_LIT: u8 = 0x1D; // Bitwise AND Register by Literal
+    pub const AND_REG_REG: u8 = 0x1F; // Bitwise AND Register by Register
+    pub const OR_REG_LIT:  u8 = 0x20; // Bitwise OR Register by Literal
+    pub const OR_REG_REG:  u8 = 0x21; // Bitwise OR Register by Register
+    pub const XOR_REG_LIT: u8 = 0x22; // Bitwise XOR Register by Literal
+    pub const XOR_REG_REG: u8 = 0x23; // Bitwise XOR Register by Register
+    pub const NOT:         u8 = 0x24; // Bitwise NOT Register
+
+    // Conditional / Branching
+    pub const JNE_LIT:     u8 = 0x25; // Jump when Literal NOT Equal
+    pub const JNE_REG:     u8 = 0x26; 
+
+    pub const JEQ_REG:     u8 = 0x27; 
+    pub const JEQ_LIT:     u8 = 0x28;
+
+    pub const JLT_REG:     u8 = 0x29; 
+    pub const JLT_LIT:     u8 = 0x2A; 
+    pub const JGT_REG:     u8 = 0x2B; 
+    pub const JGT_LIT:     u8 = 0x2C; 
+
+    // System
+    pub const HLT:         u8 = 0x30; // Halt Program
 }
