@@ -37,16 +37,16 @@ pub mod instructions {
     pub const NOT:         u8 = 0x24; // Bitwise NOT Register
 
     // Conditional / Branching
-    pub const JNE_LIT:     u8 = 0x25; // Jump when Literal NOT Equal
-    pub const JNE_REG:     u8 = 0x26; 
+    pub const JNE_REG:     u8 = 0x25; // Jump when Register NOT Equal
+    pub const JNE_LIT:     u8 = 0x26; // Jump when Literal NOT Equal
 
-    pub const JEQ_REG:     u8 = 0x27; 
-    pub const JEQ_LIT:     u8 = 0x28;
+    pub const JEQ_REG:     u8 = 0x27; // Jump when Register Equal
+    pub const JEQ_LIT:     u8 = 0x28; // Jump when Literal Equal
 
-    pub const JLT_REG:     u8 = 0x29; 
-    pub const JLT_LIT:     u8 = 0x2A; 
-    pub const JGT_REG:     u8 = 0x2B; 
-    pub const JGT_LIT:     u8 = 0x2C; 
+    pub const JLT_REG:     u8 = 0x29; // Jump when Register Less Than
+    pub const JLT_LIT:     u8 = 0x2A; // Jump when Literal Less Than
+    pub const JGT_REG:     u8 = 0x2B; // Jump when Register Greater Than
+    pub const JGT_LIT:     u8 = 0x2C; // Jump when Literal Greater Than
 
     // System
     pub const HLT:         u8 = 0x30; // Halt Program
