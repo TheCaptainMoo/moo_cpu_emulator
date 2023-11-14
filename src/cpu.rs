@@ -6,7 +6,9 @@ use crate::instructions::instructions::{
     MUL_REG_REG, MUL_LIT_REG, INC_REG, DEC_REG, LSF_REG_LIT,
     LSF_REG_REG, RSF_REG_LIT, RSF_REG_REG, AND_REG_LIT, AND_REG_REG, 
     OR_REG_LIT, OR_REG_REG, XOR_REG_LIT, XOR_REG_REG, 
-    NOT, JNE_REG, JEQ_LIT, JEQ_REG, JLT_LIT, JLT_REG, JGT_LIT, JGT_REG,
+    NOT, JNE_REG, JEQ_LIT, JEQ_REG,
+    JLT_LIT, JLT_REG, JGT_LIT, JGT_REG,
+    JMP,
 };
 
 const REGISTERS: [&str; 6] = ["ip", "gra", "grb", "grc", "grd", "rra"];
@@ -443,6 +445,12 @@ impl CPU<'_> {
                 if r1_value > self.read_register("rra"){
                     self.write_register("ip", address);
                 }
+            }
+
+            JMP => {
+                let address = self.fetch_16();
+
+                self.write_register("ip", address);
             }
 
             _ => {}

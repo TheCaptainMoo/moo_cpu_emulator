@@ -48,6 +48,8 @@ pub mod instructions {
     pub const JGT_REG:     u8 = 0x2B; // Jump when Register Greater Than
     pub const JGT_LIT:     u8 = 0x2C; // Jump when Literal Greater Than
 
+    pub const JMP:         u8 = 0x2D; // Jump
+
     // System
     pub const HLT:         u8 = 0x30; // Halt Program
 }
